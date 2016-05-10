@@ -1,0 +1,49 @@
+\documentclass[table,dvipsnames]{scrartcl}
+\usepackage[table]{xcolor}
+\usepackage{yfonts}
+\usepackage{lmodern,listings,longtable,url,graphicx,svg}
+\usepackage{pdfpages,pdflscape,amsmath}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage[backend=biber]{biblatex}
+\setcounter{biburlnumpenalty}{6000}
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+\renewcommand*{\mkbibnamefirst}{\textsc} % Setzt die Autoren-Vornamen  auf Kapitälchen 
+\renewcommand*{\mkbibnamelast}{\textsc}  % Setzt die Autoren-Nachnamen  auf Kapitälchen 
+\DeclareFieldFormat{url}{\newline\url{#1}}% Lineabreak URL 
+\usepackage{hyperref}
+\usepackage[gen]{eurosym}
+\usepackage{breakurl}
+\usepackage{tikz}
+\usepackage{minted}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+\tikzset{
+  basic/.style  = {draw, text width=2cm, drop shadow, font=\sffamily, rectangle},
+  root/.style   = {basic, rounded corners=2pt, thin, align=center,
+  fill=green!30},
+  level 2/.style = {basic, rounded corners=6pt, thin,align=center, fill=green!60,
+  text width=8em},
+  level 3/.style = {basic, thin, align=left, fill=pink!60, text width=6.5em},
+  legend/.style = {basic, thin, align=left, fill=blue!60, text width=6.5em},
+  pspl1/.style = {basic, thin, align=left, fill=yellow!60, text width=6.5em},
+  pspl2/.style = {basic, thin, align=left, fill=orange!60, text width=6.5em},
+  pspl3/.style = {basic, thin, align=left, fill=violet!60, text width=6.5em},
+  pspl4/.style = {basic, thin, align=left, fill=cyan!60, text width=6.5em},
+  money/.style = {basic, thin, align=left, fill=red!60, text width=6.5em}
+}
+\bibliography{dnsbib.bib}
+\title{XML Schema und DTD}
+\subtitle{Eine Übersicht der wichtigsten Elemente}
+\author{Nils Schasse}
+\date{}
+\begin{document}
+\maketitle
+\newpage
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+\input{XML}
+\end{document}

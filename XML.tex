@@ -1,0 +1,462 @@
+\section{Header der XML Dateien}\label{xml:header}
+\begin{minted}{xml}
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+\end{minted}
+
+Diese Zeile stellt die erste Infomation dar, die jede XML Datei enthalten soll. An dieser Stelle sind sich einige
+Quellen im Netz uneinig. W3Schools beispielsweise lässt zu, eines oder mehrere der drei Attribute auszulassen. XMLParse
+und XMLlint verweigern dann allerdings die Validierung. Nur das Standalone Attribut wird schlichtweg ignoriert. Da
+XMLParse und XMLline die Standardbibliotheken zur Validierung von XML/DTD/Schema verwenden, sollte in der Praxis so
+gearbeitet werden, dass beide Parser validieren.
+\subsection{Version}
+Das \textit{version} Attribut ist in 99\% aller Fälle die ''1.0''. Das liegt daran, dass es zwar eine Version ''1.1''
+gibt, diese jedoch in der Praxis nicht verwendet wird. Grund dafür ist primär, dass die meisten Parser die Version
+''1.1'' nicht verstehen. Die Versionierungist jedoch irreführend. XML ''1.0'' liegt aktuell in der \textit{fünften
+Auflage} vor. Eine Bezeichnung wie ''1.0-5'' wäre hier sinnvoller, ist aber nicht umgesetzt worden.
+
+\subsection{encoding}
+Mit dem Attribut encoding wird angegeben, welche Zeichenkodierung zum Speichern der XML-Datei verwendet werden soll. Folgende
+Angaben sollte jeder XML-Parser kennen.
+\begin{longtable}{|l|p{9cm}|}\hline
+  encoding=''UTF-8'' & internationaler Kodierung auf Basis der ISO/IEC-10646-Norm mit mindestens 8 Bit Zeichenbreite
+  \\\hline
+  encoding=''UTF-16'' & internationale Kodierung auf Basis der ISO/IEC-10646-Norm mit mindestens 16 Bit Zeichenbreite
+  \\\hline
+  encoding=''ISO-8859-?'' & ISO-Kodierung für diverse Sprachen mit ? als 1 für Westeuropa, 2 für Osteuropa, usw.. 
+  \\\hline
+\end{longtable}
+Ohne Angabe des encoding wird in der Regel UTF-8 angenommen. Hier aber nochmals der Hinweis, dass XMLlint in der
+aktuellen Version\footnote{using libxml version 20903} nicht glücklich ist, sollte das encoding ausgelassen werden.
+
+\subsection{standalone}
+Mit dem \textit{standalone} Attribut kann dem Parser bereits vor dem eigentlichen parsen bekannt gemacht werden, ob das
+Dokument alleinstehend ist, oder ob der Parser eine externe Resource (z.B. eine DTD) mit berücksichtigen muss.
+
+\subsection{Weitere Verarbeitungsanweisungen}
+Hin und wieder kann es notwendig sein, dass auch innerhalb der XML-Datei spezielle Anweisungen für die auslesende
+Software notiert werden müssen. Solche Anweisungen nennt man Verarbeitungsanweisungen (processing instructions).
+
+Diese Anweisungen sind frei erfunden und leben nicht in einer XML-spezifischen Welt, sondern in der Welt des parsenden
+Programmes. So kann z.B. einem parsenden Programm ein hinweis gegeben werden, dass sich an dieser Stelle ein besonderer
+Datensatzteil befindet.
+
+Diese Anweisungen werden ähnlich zum Header mit \textless?foo anweisung ?\textgreater
+
+\section{Doctypeanweisung}\label{xml:doctype}
+Direkt nach dem Header folgt die Angabe des Dokumententyps. 
+Die Dokumenttyp-Deklaration dient dazu, den Bezug zu einer Document Type Definition (DTD) herzustellen. Das Thema DTD
+wird im Abschnitt \ref{DTD}
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!DOCTYPE Gruss [
+    <!ELEMENT Gruss (#PCDATA)>
+  ]>
+  ...
+\end{minted}
+\caption{Beispiel einer Dokumenttypdeklaration mit interner DTD}
+\end{listing}
+Die Dokumenttyp-Deklaration beginnt mit \textless!DOCTYPE. Dahinter folgt, durch Leerraum getrennt, der Name des Dokumenttyps - im
+Beispiel Gruss. Der Name des Dokumenttyps muss mit dem Namen des Dokument-Elements, also dem äußersten Element in der
+XML Datei, identisch sein.
+
+Eine interne DTD folgt direkt auf das Dokument-Element. Für eine externe DTD sieht ein Beispiel wie folgt aus:
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!DOCTYPE Gruss SYSTEM "Gruss.dtd">
+  ...
+\end{minted}
+\caption{Beispiel einer Dokumenttypdeklaration mit externer DTD}
+\end{listing}
+
+Hier wird dem Parser mitgeteilt wo sich die DTD befindet. Dabei kann eine lokale oder eine fremde URL angegeben werden.
+Zusätzlich dazu kann statt dem Wort ''SYSTEM'' auch das Wort ''PUBLIC'' verwendet werden. Öffentliche Bezeichner sind
+für den Fall gedacht, dass der verarbeitende XML-Parser keine Möglichkeit hat, auf die entfernte DTD zuzugreifen (z.B.
+weil keine Internet-Verbindung besteht). Eine echte Gültigkeitsprüfung gegen die DTD ist in einem solchen Fall natürlich
+nur möglich, wenn der Parser die Regeln der DTD kennt.
+
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!DOCTYPE Gruss PUBLIC "-//MeineFirma Solutions//DTD EMail V 1.0//DE" 
+  "http://www.example.org/dtds/Gruss.dtd">
+  ...
+\end{minted}
+\caption{Beispiel einer Dokumenttypdeklaration mit externer DTD}
+\end{listing}
+
+Öffentliche Bezeichner bestehen aus drei Teilen: erstens der Angabe zur veröffentlichenden Person oder Institution,
+zweitens einer Bezeichnung der DTD, beginnend mit DTD, gefolgt vom Namen der DTD und einer Versionsangabe, und drittens
+aus einer Angabe zur Sprache, in der die Namen der Elemente, Attribute usw. in der DTD definiert sind. DE steht für
+deutsch, EN für englisch usw. Hinter der Angabe zum öffentlichen Bezeichner kann dann noch - wie im obigen Beispiel -
+die Internet-Adresse mit dem tatsächlichen Speicherort der DTD folgen.
+XMLlint kann diese DTD z.B. vor dem validieren herunterladen und verarbeiten (sofern dies möglich ist).
+
+\section{XML Elemente}
+Jedes Dokument hat genau ein Element. Das klingt zunächst etwas merkwürdig, ist aber korrekt. Das Element nennt sich
+Root Element und kann seinerseits wieder Elemente enthalten. Diese Schachtelung führt immer zu einer baumartigen
+Struktur. Diese Struktur ist gewollt, da sie das maschinelle Verarbeiten erleichtert.
+\subsection{Tags}
+Alle Elemente werden durch Tags eingeleitet und ausgeleitet. Das Wort Tag ist dem englischen Wort für ''Etikett''
+entliehen und könnte auf Deutsch auch zu ''Abgrenzer'' übersetzt werden.
+Tags werden wie bei HTML Elementen verwendet. Ein Tag wird mit \textless FOO\textgreater eingeleitet und mit
+\textless/FOO\textgreater ausgeleitet.
+
+\begin{minted}{xml}
+<FOO>Lorem Ipsim</FOO>
+\end{minted}
+
+Abgrenzend zu HTML sollte hier erwähnt werden, dass die Benennung der Tags zwar frei wählbar ist, allerdings vier
+kleinen Regeln folgen müssen: \\
+Sie dürfen nicht
+\begin{itemize}
+    \item mit der Zeichenfolge xml 
+    \item mit Ziffern beginnen
+    \item Gleichheitszeichen 
+    \item Leerzeichen enthalten
+\end{itemize}
+
+Besonderheit: Leere Elemente. Für Leere Elemente gibt es die Kurzschreibweise:
+ \begin{minted}{xml}
+<FOO/>
+\end{minted}
+ 
+\subsection{Attribute}
+Elemente können (falls nötig) mit Attributen versehen werden. Attribute sind in der Regel eine schlechte Idee, werden
+aber aus unerfindlichen Gründen zugelassen und führen das Grundkonzept von XML, nämlich das X\footnote{XML: Extensible
+Markup Language}, ad absurdum. Attribute können eben nicht weiter verschachtelt werden und sind somit nicht
+erweiterbar. Hingegen kann einem Element jederzeit eine weitere Verschachtelungsebene hinzugefügt werden. Das Portieren
+der bereits vorhandenen Dokumente kann allerdings auch dabei recht komplex werden. Daher sollte man das X eher auf das
+Designen seiner Datenstrukturen beziehen. In den wenigen Fällen, in denen klar ist, dass es keine Erweiterbarkeit gibt,
+kann es beim Parsen etwas leichter werden, wenn Attribute verwendet werden. Beispielsweise kann eine ID als Attribut
+vergeben werden, die ein Element (bzw. einen kompletten Subtree in der Baumstruktur) kennzeichnet. So kann beim Parsen
+explizit (ähnlich zu HTML) auf ein Element zugegriffen werden, und der Subtree bei allen nicht matchenden Elementen
+ignoriert werden.
+
+Um eine abstrakte Faustregel an dieser Stelle zu liefern kann formuliert werden:
+\framebox{Es ist sinnvoll Metadaten als Attribute zu setzen, Daten selbst jedoch als Elemente.}
+
+Attribute müssen diesen Regeln folgen:
+\begin{itemize}
+    \item Ein Attributname darf nur einmal in einem Tag vorkommen.
+    \item Der Typ des Attributs muss in der DTD definiert sein.
+    \item Attribute dürfen nicht auf externe Entitäten verweisen (siehe Abschnitt \ref{XML:Entities}).
+    \item Durch eine Entität ersetzte Inhalte dürfen das Zeichen \textless\ nicht enthalten.
+\end{itemize}
+
+\begin{listing}[H]
+\begin{minted}{xml}
+  <table cellpadding="5" cellspacing="1">
+    <tr>
+      <td>Eine Zelle</td>
+    </tr>
+  </table>
+\end{minted}
+\caption{Beispiel einer Mixtur aus Attributen und Elementen in HTML}
+\end{listing}
+
+Im Beispiel wurde die Faustregel eingehalten. Daten über die Tabelle sind als Attribute geschrieben worden, die
+eigentlichen Daten als Element.
+
+Auch Attribute sind in XML entgegen zu HTML Case-Sensitive.
+
+\subsection{Entitäten}\label{XML:Entities}
+Entitäten können in XML grob als "Platzhalter" mit Inhalt verstanden werden. Eine Entity wird in der DTD definiert.
+\begin{listing}[H]
+\begin{minted}{dtd}
+<!ENTITY writer "Donald Duck.">
+\end{minted}
+\caption{Beispiel einer lokalen DTD mit interner Entity}
+\end{listing}
+
+Entitäten können auch extern eingelesen werden:
+\begin{listing}[H]
+\begin{minted}{dtd}
+<!ENTITY writer SYSTEM "http://www.w3schools.com/entities.dtd">
+\end{minted}
+\caption{Beispiel einer lokalen DTD mit externer Entity}
+\end{listing}
+
+Hier muss der Parser nun die Entität extern auflösen. Attribute können auf diese externen Definitionen nicht
+zugegreifen.
+
+\subsection{Kommentare}
+Kommentare werden wiein HTML mit \textless!-- eingeleitet und mit --\textgreater ausgeleitet. Kommentare können in DTD bereichen und XML
+Bereichen verwendet werden.
+\begin{minted}{xml}
+<!-- Ich bin nur ein Kommentar -->
+\end{minted}
+
+\subsection{Namensraum}
+Namensräume werden in XML ebenfalls unterstützt. Jedoch ist die Unterstützung leider etwas eingeschränkt.
+Ein benannter Namensraum lässt sich leider nicht global über Elemente legen, sondern wird über einen Präfix definiert, der jedem
+zugehörigen Element vergeben werden muss. Sowohl in der DTD als auch im Dokument selbst.
+Um einen Namensraum zu definieren erhält ein Dokument das Attribut xmlns:
+\begin{minted}{xml}
+<note xmlns:foo="http://someUrl.de">...
+\end{minted}
+
+Dabei stellt foo den Namen des Namensraums dar. Alle zugehörigen Kinder von note können jetzt mit dem Präfix foo versehen und
+dem Namensraum zugewiesen werden.
+
+\begin{minted}{xml}
+<note xmlns:foo="http://someUrl.de">
+  <foo:bar>quux</foo:bar>
+</note>
+\end{minted}
+
+Es können beliebig viele Namensräume kombiniert werden. Die eingangs erwähnte schwache Unterstützung der Namensräume
+liegt daran, dass der Präfix immer verwendet werden muss, auch wenn es nur einen Namespace gibt. Um diese Schwäche etwas
+abzufedern lässt sich auch ein Default-Namensraum ohne Präfix definieren, so dass die Kind-Elemente nicht alle manuell
+gepräfixed werden müsswen. Dazu lässt man einfach die Benennung des xmlns Attributs aus:
+
+\begin{minted}{xml}
+<note xmlns"http://someUrl.de">...</note>
+\end{minted}
+
+Es ist nun möglich innerhalb von \textless note\textgreater den Default-Namensraum zu ändern. 
+\begin{minted}{xml}
+<note xmlns="http://someUrl.de">
+  <foo>quux</foo>
+  <bar xmlns="http://someOtherUrl.de">
+    <more>...</more>
+  </bar>
+</note>
+\end{minted}
+
+Die Elemente note und foo gehören zum Namensraum ''http://someUrl.de'', bar und more gehören zu
+''http://someOtherUrl.de''.
+
+Jedes xmlns Attribut muss wie bereits erwähnt in der DTD bekannt gemacht werden. Siehe dazu Sektion \ref{DTD:attribute}.
+
+\subsection{Sonderzeichen}
+Auch in XML haben wie in HTML einige Zeichen eine besondere Bedeutung. Folgende Zeichen haben vordefinierte Entities:
+\begin{longtable}{|l|l|}\hline
+  Zeichen & Entity \\\hline
+  $<$ & \&lt; \\\hline
+  $>$ & \&gt; \\\hline
+  \& & \&amp; \\\hline
+  '' & \&quot; \\\hline
+  ' & \&apos; \\\hline
+\end{longtable}
+
+\section{DTDs}\label{DTD}
+Document Type Definitions sind die erste Stufe nicht nur wohlgeformtes XML (syntaktisch korrekt) zu erzwingen, sondern
+auch Regeln für die Elemente und Attribute zu erstellen. DTDs sind allerdings in Ihrer Form beschränkt. Die zweite
+Stufe, das XML Schema, wird in Abschnitt \ref{Schema} beschrieben.
+
+DTDs können intern oder extern geschrieben werden. Wie in den vorhergehenden Beispielen bereits gesehen werden konnte
+werden interne DTDs direkt nach der DOCTYPE Definition eingebunden, externe über das Schlüsselwort SYSTEM.
+
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!DOCTYPE Gruss SYSTEM "Gruss.dtd">
+  ...
+\end{minted}
+\caption{Beispiel einer Dokumenttypdeklaration mit externer DTD}
+\end{listing}
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!DOCTYPE Gruss [ ***DTD*** ]>
+  ...
+\end{minted}
+\caption{Beispiel einer Dokumenttypdeklaration mit interner DTD}
+\end{listing}
+
+\subsection{Elemente}
+In der DTD können Elemente in Ihrer Reihenfolge und Beschaffenheit definiert werden. Eingeleitet werden DTD Elemente mit
+\textless!ELEMENT\textgreater. 
+
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!ELEMENT name inhalt>
+\end{minted}
+\caption{Syntax für die Deklaration von Elementen}
+\end{listing}
+
+Der Elementname entspricht dem Tag Namen und der Inhalt wird kann aus folgenden Bausteinen bestehen:
+\begin{longtable}{|p{0.25\textwidth}|p{0.7\textwidth}|}\hline
+  EMPTY & Das Element ist immer leer\\\hline
+  ANY & Es kann jeder beliebeige Inhalt (Text, Elemente) enthalten sein\\\hline
+  (\#PCDATA) & Es darf nur Text (Parsable Character Data) enthalten sein\\\hline
+  (el1| el2,el3* | el4+ ....) & Angabe der möglichen Elemente (getrennt durch |-Symbol) oder der genauen Reihenfolge
+  (getrennt durch Komma). Zusammenfassen durch runde Klammern ist erlaubt. Die Sonderzeichen nach den Elementnamen sind:
+  \begin{tabular}{|l|l|}\hline
+    Keines & Element kommt genau einmal vor \\\hline
+    + & Element kommt mindestens einmal vor \\\hline
+    * & Element kommt null bis n mal vor \\\hline
+    ? & Element kommt genau 0 oder 1 mal vor.
+  \end{tabular}\\\hline
+\end{longtable}
+Zu beachten sind hier die Klammern.
+
+\begin{listing}[H]
+\begin{minted}{dtd}
+<!ELEMENT name (meinelement, 
+  deinelement+, 
+  irgendeinelement|einandereselement)
+>
+\end{minted}
+\caption{Beispiel für die Deklaration von Elementen}
+\end{listing}
+
+
+\subsection{Attribute}\label{DTD:attribute}
+
+Attribute werden in einer DTD sehr ähnlich angegegeben:
+\begin{listing}[H]
+\begin{minted}{dtd}
+  <!ATTLIST Elementname Attributname1 inhalt [TYP oder Wert] 
+                        Attributname2 inhalt [Typ oder Wert] ...>
+\end{minted}
+\caption{Syntax für die Deklaration von Attributen}
+\end{listing}
+
+Der Inhalt ist in der Regel CDATA, kann aber auch ein Definierter Enum sein, also eine Angabe von möglichen Werten. Dazu
+ein etwas komplexeres Beispiel:
+\begin{listing}[H]
+\begin{minted}{dtd}
+<!ELEMENT hotels (hotel)*>
+<!ELEMENT hotel (#PCDATA)>
+<!ATTLIST hotel
+  name            CDATA               #REQUIRED
+  klasse          (I|II|III|IV|V)     #FIXED "II"
+  einzelzimmer    (ja|nein)           #IMPLIED
+  doppelzimmer    (ja|nein)           "ja"
+>
+\end{minted}
+\caption{Beispiel für die Deklaration von Attributen}
+\end{listing}
+
+Für CDATA darf der Inhalt ''irgendeine'' Abfolge von Zeichen sein. Für Klasse dürfen nur Römische Zahlen von 1-5 angegeben
+werden. Einzel- und Doppelzimmer können ja und nein enthalten. Zusätzlich sehen wir die Typworte \#REQUIRED und
+\#IMPLIED und \#FIXED, sowie einen Wert des vorstehenden Enums direkt. 
+
+\subsubsection{\#IMPLIED}
+Das Schlüsselwort \#IMPLIED ist hier etwas ungünstig, denn es impliziert nicht, sondern sagt lediglich aus, das der Wert
+Optional ist, also auch ausgelassen werden darf. Da Attribute nicht mehrfach verwendet werden dürfen entspricht \#IMPLIED
+also dem Elementzusatz ? (0 oder 1 Vorkommen). Warum XML hier einer anderen Notation folgt ist mir leider nicht
+ersichtlich.
+
+\subsubsection{\#REQUIRED}
+Das Schlüsselwort \#REQUIRED sagt aus, dass das Attribut angegeben sein muss. Es entspricht dem Zusatzlosen Element. Es
+muss also genau einmal vorkommen.
+
+\subsubsection{\#FIXED}
+Etwas verwirrender ist das \#FIXED Schlüsselwort, denn es setzt dem Attribut einen festen Wert von dem nicht abgewichen
+werden darf. Zudem muss dieser Wert im Datensatz angegeben werden (darf nicht ausgelassen werden). So kann
+Beispielsweise ein Namensraum erzwungen werden. Ein tieferer Sinn erschließt sich mir auch hier nicht.
+
+\subsubsection{Vorgabewerte}
+Wird das Attribut Doppelzimmer ausgelassen, so wird im obigen Beispiel einfach der Wert ''ja'' angenommen.
+
+\subsubsection{Weitere nutzbare Typen}
+Statt den angegeben Typen CDATA und Enum können noch die Typen IDREF, ID und ENTITY. Auf letztere werde ich an dieser
+Stelle nicht eingehen, da das Einbinden von Entitäten in DTDs kompliziert und teilweise unzulässig ist. IDs und IDREFs
+verhalten sich in der Theorie wie Primärschlüssel und Fremdschlüssel bei relationalen Datenbanken. Leider ist die
+Prüfung oft nicht restriktiv umgesetzt. Eine ID muss eindeutig im gesamten Dokument sein, eine IDREF muss auf eine
+andere ID verweisen (Elternelement). Feinheiten wie zusammengesetzte Schlüssel gibt es bei DTDs leider nicht.
+
+
+\section{XML Schema}\label{Schema}
+XML Schema sind, wie bereits erwähnt, der inoffizielle Nachfolger von DTDs. XML Schema wird auch als XSD (XML Schema
+Definition) bezeichnet und will den gleichen Bereich abdecken wie die DTD und Mängel an den DTDs ausgleichen. Einer der
+größten Neuerungen ist die Unterstützung von Datentypen. So ist es einfacher Datentypen zu erzwingen und sogar selbst zu
+definieren. Man stelle sich vor, man würde alle Buchstaben, außer einem ''d'' als Enum in einer DTD definieren müssen.
+XSD bietet diese Möglichkeit.
+
+\subsection{Header}
+XSD Dateien werden in XML geschrieben. Im Gegensatz zu den DTDs beginnen wir also wieder mit dem 
+\begin{minted}{xml}
+<?xml version="1.0" encoding="UTF-8"?>
+\end{minted}
+Header als Einleitung. Anschließend verwenden wir einen besonderen Namensraum: Der xmlns:xs-Namensraum muss für XSD
+immer folgendermaßend efiniert werden.
+\begin{minted}{xml}
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+...
+\end{minted}
+Dabei ist der Bezeichner \textit{xs} beliebig gewählt werden. Dieser Namensraum beschreibt die vordefinierten Datentypen. 
+Zusätzlich können die Attribute xmlns und targetNamespace gesetzt werden:
+\begin{minted}{xml}
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://meinnamespace.meinefirma.de"
+  targetNamespace="http://meinnamespace.meinefirma.de"
+>
+\end{minted}
+Dabei stellt der targetNamespace den Namespace der gegen das Schema zu validierenden XML Datei dar und der xmlns den
+Default Namensraum des Schemas selbst.
+
+Will man ein so eingeleitetes Schema verwenden so würde die XML Datei wie folgt aussehen:
+\begin{minted}{xml}
+<?xml version="1.0" encoding="ISO-8859-1"?>
+  <MeinRootElement xmlns="http://meinnamespace.meinefirma.de"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://meinnamespace.meinefirma.de
+    http://www.meinefirma.de/MeinSchema.xsd">
+    <MeinUnterElement>
+      Elementinhalt
+    </MeinUnterElement>
+  </MeinRootElement>
+\end{minted}
+
+Auch der Namensraum xsi ist hier vorgegeben. So wird dem Parser mitgeteilt, dass es sich um eine Instanz eines mit einer
+XSD Datei zu validierenden Schemas handelt.
+
+Anschließend wird das Schema mit xsi:schemaLocation bekannt gemacht. Dabei wird der Schema Namensraum mit Leerzeichen
+getrennt vor die URI gestellt.
+
+\subsection{Elemente}
+Wir bleiben beim Schemanamensraum xs wie im obigen Beispiel. Um ein Element zu definieren müssen wir nun folgermaßen
+vorgehen:
+\begin{minted}{xml}
+<xs:element name="artikel">...</xs:element>
+\end{minted}
+Wir öffnen also ein element aus dem W3C Namensraum, welches den Bezeichner ''artikel'' trägt.
+Innerhalb des Tags bestimmen wir nun den Inhalt des Elements.
+\begin{minted}{xml}
+  <xs:element name="artikel">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="titel" type="xs:string"/>
+        <xs:element name="teaser" type="xs:string"/>
+        <xs:element name="inhalt" type="xs:string"/>
+        <xs:element name="wertung" type="xs:decimal"/>
+        <xs:element name="anzahl" type="xs:integer"/>
+        <xs:element name="oem" type="xs:boolean"/>
+        <xs:element name="daum" type="xs:date"/>
+        <xs:element name="zeit" type="xs:time"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+\end{minted}
+
+An diesem Beispiel sehen wir, dass wir zunächst einen neuen komplexen Datentypen definieren müssen, welcher aus einer
+Sequenz von Elementen besteht. Die einzelnen Elemente haben hier den Datentyp angegeben.
+
+\subsubsection{Mehrfach vorkommende Elemente und beliebeige Reihenfolge}
+Das oben angegebene Beispiel setzt eine feste Reihenfolge mit genau einem Vorkommen jedes Elenents fest.
+Um Elemente mit den DTD zusätzen ?+* zu versehen gibt es im  XSD die Attribute ''minOccurs'' und ''maxOccurs''.
+Diese Attribute nehmen Zahlenwerte oder ''unbounded'' an.
+
+Beispiel:
+\begin{minted}{xml}
+  <xs:element name="anzahl" 
+              type="xs:integer" 
+              minOccurs="0" 
+              maxOccurs="unbounded"/>
+\end{minted}
+Hier können beliebig viele Elemente <Anzahl> vorkommen. Auch hier zeigt sich eine feinere Restriktion als bei DTDs, so
+kann auch 5 bis 9 Mal definiert werden, was zuvor nicht möglich war.
+
+Um die Reihenfolge beliebig zu halten kann statt xs:sequence einfach der Tag xs:all verwendet werden. 
+\subsection{Attribute}
+Dieser Abschnitt ist kurz. Attribute sind immer einfache Typen und folgen also den nicht-komplexen Elementregeln.
+\begin{minted}{xml}
+<xs:attribute name="inhalt" type="xs:string"/>
+\end{minted}
+
+Die Werte default, fixed, optional (statt \#IMPLIED) und required können mit dem \textit{use} Attribut angegeben werden:
+\begin{minted}{xml}
+<xs:attribute name="inhalt" type="xs:string" use="required"/>
+\end{minted}
+
+
